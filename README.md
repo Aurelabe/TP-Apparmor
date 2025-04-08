@@ -126,7 +126,7 @@ PermitEmptyPasswords no
 ChallengeResponseAuthentication no
 UsePAM yes
 PubkeyAuthentication yes
-AllowUsers mon_admin
+AllowUsers aurel
 ```
 
 4. **Redémarrage du service SSH** :
