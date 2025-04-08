@@ -1,8 +1,3 @@
-Voici la mise à jour du rapport avec l'ajout de la configuration de l'adresse IP statique via `nmcli` :
-
----
-
-```markdown
 # Rapport de TP – Durcissement d’un serveur Ubuntu avec AppArmor
 
 ## 1. Aperçu du Lab
