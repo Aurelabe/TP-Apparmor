@@ -1,3 +1,8 @@
+Voici la mise à jour du rapport avec l'ajout de la configuration de l'adresse IP statique via `nmcli` :
+
+---
+
+```markdown
 # Rapport de TP – Durcissement d’un serveur Ubuntu avec AppArmor
 
 ## 1. Aperçu du Lab
@@ -47,9 +52,42 @@ Résultat : Aucun correctif en attente.
 
 ---
 
-## 3.2 Sécurisation de l’administration du serveur
+## 3.2 Configuration de l’adresse IP statique via `nmcli`
 
-### 3.2.1 Configuration de SSH selon les recommandations de l’ANSSI
+Afin d'attribuer une adresse IP statique à notre serveur, l'outil `nmcli` a été utilisé.
+
+#### Étapes :
+
+1. **Vérification de la connexion réseau actuelle** :
+```bash
+nmcli connection show
+```
+
+2. **Modification de la connexion réseau** pour définir une IP statique :
+```bash
+nmcli connection modify "Wired connection 1" ipv4.addresses 10.1.1.14/24
+nmcli connection modify "Wired connection 1" ipv4.gateway 10.1.1.1
+nmcli connection modify "Wired connection 1" ipv4.dns "8.8.8.8 8.8.4.4"
+nmcli connection modify "Wired connection 1" ipv4.method manual
+```
+
+3. **Redémarrage de la connexion réseau pour appliquer les modifications** :
+```bash
+nmcli connection down "Wired connection 1" && nmcli connection up "Wired connection 1"
+```
+
+4. **Vérification de la nouvelle configuration IP** :
+```bash
+ip a
+```
+
+L'adresse IP statique du serveur est désormais configurée sur `10.1.1.14`.
+
+---
+
+## 3.3 Sécurisation de l’administration du serveur
+
+### 3.3.1 Configuration de SSH selon les recommandations de l’ANSSI
 
 Référence utilisée : [ANSSI – Recommandations de sécurité relatives à SSH](https://cyber.gouv.fr/sites/default/files/2014/01/NT_OpenSSH.pdf?utm_source=chatgpt.com)
 
@@ -99,7 +137,7 @@ ssh mon_admin@10.1.1.14 -p 1025
 
 ---
 
-### 3.2.2 Filtrage réseau strict
+### 3.3.2 Filtrage réseau strict
 
 Objectif : Seuls les flux utiles doivent être autorisés.
 
@@ -122,9 +160,9 @@ sudo ufw status numbered
 
 ---
 
-## 3.3 Installation d’un serveur Web
+## 3.4 Installation d’un serveur Web
 
-### 3.3.1 Installation d’Apache :
+### 3.4.1 Installation d’Apache :
 ```bash
 sudo apt install apache2
 ```
@@ -138,26 +176,26 @@ Résultat : Page par défaut d’Apache.
 
 ---
 
-### 3.3.2 Installation d’AppArmor :
+### 3.4.2 Installation d’AppArmor :
 ```bash
 sudo apt install apparmor apparmor-utils
 ```
 
-### 3.3.3 Modes d’AppArmor :
+### 3.4.3 Modes d’AppArmor :
 
 - **Complains (complain)** : le profil enregistre les violations mais ne les bloque pas.
 - **Enforce** : les violations sont bloquées selon les règles du profil.
 - **Disable** : le profil est désactivé.
 
-### 3.3.4 Que se passe-t-il si un profil en mode enforce ne correspond pas à l’usage réel ?
+### 3.4.4 Que se passe-t-il si un profil en mode enforce ne correspond pas à l’usage réel ?
 
 > L’exécution du programme sera bloquée ou échouera (erreurs d’accès, refus d’exécution), ce qui peut causer des dysfonctionnements ou une indisponibilité partielle du service.
 
 ---
 
-## 3.4 Création et test d’un profil AppArmor
+## 3.5 Création et test d’un profil AppArmor
 
-### 3.4.1 Création d’un profil pour `ls`
+### 3.5.1 Création d’un profil pour `ls`
 
 1. Lancement de `aa-genprof` :
 ```bash
@@ -168,7 +206,7 @@ sudo aa-genprof /bin/ls
 
 3. AppArmor propose les règles à ajouter automatiquement.
 
-### 3.4.2 Vérification du fonctionnement du profil :
+### 3.5.2 Vérification du fonctionnement du profil :
 
 ```bash
 sudo aa-status
@@ -176,7 +214,7 @@ sudo aa-status
 
 Permet de voir les profils actifs et leur mode.
 
-### 3.4.3 Premier constat en mode complain :
+### 3.5.3 Premier constat en mode complain :
 
 ```bash
 sudo aa-complain /etc/apparmor.d/bin.ls
@@ -188,7 +226,7 @@ sudo aa-complain /etc/apparmor.d/bin.ls
 sudo journalctl -xe | grep apparmor
 ```
 
-### 3.4.4 Amélioration du profil :
+### 3.5.4 Amélioration du profil :
 
 Ajout des chemins nécessaires pour un fonctionnement complet :
 ```text
@@ -207,7 +245,7 @@ Exécution des commandes `ls`, `ls -l`, `ls /proc` → tout fonctionne.
 
 ---
 
-## 3.5 Durcissement de la configuration d’AppArmor
+## 3.6 Durcissement de la configuration d’AppArmor
 
 Référence utilisée : **CIS Benchmark Ubuntu 22.04**, section sur AppArmor.
 
@@ -257,3 +295,7 @@ Ce TP m’a permis de mieux comprendre la logique de durcissement des systèmes 
 - Liste des ports ouverts : voir `ufw status`
 - Configuration SSH : voir `/etc/ssh/sshd_config`
 ```
+
+---
+
+N'hésite pas à me dire si tu as d'autres ajustements à faire.
