@@ -321,48 +321,8 @@ Voici les étapes suivies pour effectuer cette modification :
    Après cette modification, la commande `ls` a fonctionné correctement, et les erreurs d'accès ont été résolues.
 
 
-### 3.5.2 Vérification du fonctionnement du profil :
-
-```bash
-sudo aa-status
-```
-
-Permet de voir les profils actifs et leur mode.
-
-![image](https://github.com/user-attachments/assets/c057c31d-1bb6-4abf-81b5-9a8972d423f7)
-
-`ls` fait partir des profiles en mode `enforce`
-
-### 3.5.3 Premier constat en mode complain :
-
-```bash
-sudo aa-complain /etc/apparmor.d/bin.ls
-```
-
-- Utilisation de `ls` → pas de blocage mais génération de logs
-- Vérification des logs :
-```bash
-sudo journalctl -xe | grep apparmor
-```
-
-### 3.5.4 Amélioration du profil :
-
-Ajout des chemins nécessaires pour un fonctionnement complet :
-```text
-  /etc/passwd r,
-  /usr/lib/locale/** r,
-  /etc/ld.so.cache r,
-  /proc/** r,
-```
-
-Puis test en mode enforce :
-```bash
-sudo aa-enforce /etc/apparmor.d/bin.ls
-```
-
-Exécution des commandes `ls`, `ls -l`, `ls /proc` → tout fonctionne.
-
 ---
+
 
 ## 3.6 Durcissement de la configuration d’AppArmor
 
@@ -375,10 +335,15 @@ Référence utilisée : **CIS Benchmark Ubuntu 22.04**, section sur AppArmor.
 sudo systemctl is-enabled apparmor
 ```
 
+![image](https://github.com/user-attachments/assets/89622f5f-f514-4b31-8ca1-25ceb7a5d1b1)
+
 - Audit des profils en complain :
 ```bash
 sudo aa-logprof
 ```
+
+![image](https://github.com/user-attachments/assets/d7153787-74c6-4e8a-874c-01300eef297e)
+
 
 - Conversion des profils en enforce :
 ```bash
@@ -403,18 +368,3 @@ L’ensemble des mesures de sécurité demandées dans le cadre de ce TP ont ét
 - Le filtrage réseau est strict, seuls les flux nécessaires sont ouverts.
 - AppArmor est actif, avec des profils personnalisés testés et renforcés.
 - Le serveur web fonctionne normalement malgré les mesures de durcissement.
-
-Ce TP m’a permis de mieux comprendre la logique de durcissement des systèmes Linux et la puissance des outils comme AppArmor dans la mise en œuvre du principe de défense en profondeur.
-
----
-
-## Annexe
-
-- Profil AppArmor final pour `/bin/ls` : voir fichier joint `/etc/apparmor.d/bin.ls`
-- Liste des ports ouverts : voir `ufw status`
-- Configuration SSH : voir `/etc/ssh/sshd_config`
-```
-
----
-
-N'hésite pas à me dire si tu as d'autres ajustements à faire.
